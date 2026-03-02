@@ -65,6 +65,52 @@ This project is a small, production‑ready demo of a **multi‑agent financial 
 
 ---
 
+### Architectural Flow Diagram (Mermaid)
+
+```mermaid
+flowchart TD
+    %% Client & API Layer
+    Client([Client / Frontend]) -->|GET /analyze \n POST /invoke| API[FastAPI Server]
+    API -.->|Server-Sent Events SSE| Client
+    
+    %% Validation Step
+    subgraph Pre-Processing
+        API --> Regex[Regex Validation]
+        Regex -->|Valid Format| TickerVal[LLM Ticker Validation]
+        Regex -->|Invalid| Error[Return Error Event]
+        TickerVal -->|Invalid| Error
+    end
+
+    %% LangGraph Multi-Agent Workflow
+    subgraph LangGraph Orchestration
+        TickerVal -->|Valid Ticker| InitState[(AgentState Initialized)]
+        InitState --> Supervisor
+        
+        Supervisor[Supervisor Node \n Summarizes State]
+        Router{Supervisor Router \n Decision Maker}
+        Researcher[Researcher Node \n + DuckDuckGo Search]
+        Analyst[Analyst Node \n Risk Assessment]
+        
+        Supervisor --> Router
+        
+        %% Routing Logic
+        Router -->|1. 'research' is empty| Researcher
+        Researcher -->|Updates 'research'| Supervisor
+        
+        Router -->|2. 'analysis' is empty| Analyst
+        Analyst -->|Updates 'analysis'| Supervisor
+        
+        Router -->|3. Both exist| End((END))
+    end
+    
+    %% Streaming hook
+    Supervisor -.->|Yield State Updates| API
+    Researcher -.->|Yield State Updates| API
+    Analyst -.->|Yield State Updates| API
+```
+
+---
+
 ### LLM & Tools Layer
 
 - **LLM Client (`GenAIGeminiChat`)**
