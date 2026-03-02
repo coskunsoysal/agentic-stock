@@ -116,8 +116,16 @@
     </div>
 
     <script>
-      // Set this to your Cloud Run base URL, e.g. "https://financial-intel-demo-xyz.a.run.app"
-      const API_BASE_URL = "http://localhost:8080";
+      // Local and Live API base URLs
+      const LOCAL_API_BASE_URL = "http://localhost:8080";
+      // Replace this with your Cloud Run URL when deploying:
+      const LIVE_API_BASE_URL = "https://financial-intel-demo-qabzg66xgq-uc.a.run.app";
+
+      // Auto-select base URL: localhost -> local API, otherwise Cloud Run
+      const API_BASE_URL =
+        window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+          ? LOCAL_API_BASE_URL
+          : LIVE_API_BASE_URL;
 
       const tickerInput = document.getElementById("ticker-input");
       const runBtn = document.getElementById("run-btn");
