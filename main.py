@@ -9,7 +9,7 @@ from google import genai
 from google.genai import types
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, FileResponse
 from langchain_community.tools import DuckDuckGoSearchRun
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
 from langgraph.graph import END, StateGraph
@@ -383,6 +383,12 @@ async def invoke(request: InvokeRequest) -> StreamingResponse:
         stream_graph_updates(request.ticker),
         media_type="text/event-stream",
     )
+
+
+@app.get("/")
+async def serve_index():
+    """Serve the main UI."""
+    return FileResponse("index.html")
 
 
 @app.get("/analyze")
